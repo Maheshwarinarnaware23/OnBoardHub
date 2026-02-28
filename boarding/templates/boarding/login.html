@@ -1,0 +1,81 @@
+{% extends 'boarding/base.html' %}
+{% block title %}Login – OnBoardHub{% endblock %}
+
+{% block auth_content %}
+<div style="min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);display:flex;align-items:center;justify-content:center;">
+    <div style="width:100%;max-width:420px;padding:1.5rem;">
+
+        <div class="text-center mb-4">
+            <div style="width:56px;height:56px;background:#1a56db;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                <i class="bi bi-building-check text-white" style="font-size:1.5rem;"></i>
+            </div>
+            <h1 style="color:#fff;font-size:1.5rem;font-weight:700;margin-bottom:0.25rem;">OnBoardHub</h1>
+            <p style="color:#94a3b8;font-size:0.875rem;">Sign in to your account</p>
+        </div>
+
+        <div class="card" style="border-radius:16px;">
+            <div class="card-body p-4">
+                {% if messages %}
+                    {% for msg in messages %}
+                    <div class="alert alert-danger py-2 mb-3">
+                        <i class="bi bi-exclamation-triangle me-1"></i> {{ msg }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="border-radius:8px 0 0 8px;border-color:#cbd5e1;background:#f8fafc;">
+                                <i class="bi bi-person text-muted"></i>
+                            </span>
+                            <input type="text" name="username" class="form-control" placeholder="Enter your username" required
+                                   style="border-radius:0 8px 8px 0;">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="border-radius:8px 0 0 8px;border-color:#cbd5e1;background:#f8fafc;">
+                                <i class="bi bi-lock text-muted"></i>
+                            </span>
+                            <input type="password" name="password" id="pwd" class="form-control" placeholder="Enter your password" required
+                                   style="border-radius:0 8px 8px 0;">
+                            <button type="button" class="btn btn-outline-secondary" style="border-radius:0 8px 8px 0;border-color:#cbd5e1;"
+                                    onclick="togglePwd()">
+                                <i class="bi bi-eye" id="eye-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <p class="text-center mt-3" style="color:#64748b;font-size:0.78rem;">
+            Candidates: use credentials sent to your email.<br>
+            HR: use your admin login.
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePwd() {
+    const pwd = document.getElementById('pwd');
+    const icon = document.getElementById('eye-icon');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        pwd.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+</script>
+{% endblock %}

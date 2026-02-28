@@ -1,0 +1,121 @@
+{% extends 'boarding/base.html' %}
+{% block title %}HR Dashboard – OnBoardHub{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Manage all onboarding candidates</p>
+    </div>
+    <a href="{% url 'create_candidate' %}" class="btn btn-primary">
+        <i class="bi bi-person-plus me-2"></i>Add Candidate
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card bg-primary-grad">
+            <i class="bi bi-people stat-icon"></i>
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Total Candidates</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card bg-warning-grad">
+            <i class="bi bi-hourglass stat-icon"></i>
+            <div class="stat-value">{{ stats.pending }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card bg-info-grad">
+            <i class="bi bi-arrow-repeat stat-icon"></i>
+            <div class="stat-value">{{ stats.in_progress }}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card bg-success-grad">
+            <i class="bi bi-check-circle stat-icon"></i>
+            <div class="stat-value">{{ stats.completed }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+</div>
+
+<!-- Candidates Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-table me-2 text-primary"></i>All Candidates</span>
+        <span class="badge bg-primary rounded-pill">{{ stats.total }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if candidates %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead style="background:#f8fafc;">
+                    <tr>
+                        <th class="ps-4">Candidate</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Joining Date</th>
+                        <th>Documents</th>
+                        <th>Status</th>
+                        <th class="pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for candidate in candidates %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#3b82f6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span style="color:#fff;font-weight:700;font-size:0.75rem;">{{ candidate.full_name|first|upper }}</span>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;color:#0f172a;">{{ candidate.full_name }}</div>
+                                <div style="font-size:0.75rem;color:#94a3b8;">{{ candidate.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ candidate.position }}</td>
+                    <td>{{ candidate.department }}</td>
+                    <td>{{ candidate.joining_date|default:"—" }}</td>
+                    <td>
+                        {% with doc_count=candidate.documents.count %}
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="width:80px;">
+                                <div class="progress-bar bg-primary" style="width:{% widthratio doc_count 7 100 %}%"></div>
+                            </div>
+                            <small class="text-muted">{{ doc_count }}/7</small>
+                        </div>
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <span class="status-badge badge-{{ candidate.status }}">
+                            {% if candidate.status == 'pending' %}<i class="bi bi-clock me-1"></i>{% endif %}
+                            {% if candidate.status == 'in_progress' %}<i class="bi bi-arrow-repeat me-1"></i>{% endif %}
+                            {% if candidate.status == 'completed' %}<i class="bi bi-check-circle me-1"></i>{% endif %}
+                            {{ candidate.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="pe-4">
+                        <a href="{% url 'candidate_detail' candidate.pk %}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-people" style="font-size:3rem;color:#cbd5e1;"></i>
+            <p class="mt-2 text-muted">No candidates yet. <a href="{% url 'create_candidate' %}">Add your first candidate</a>.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

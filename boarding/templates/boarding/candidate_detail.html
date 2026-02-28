@@ -1,0 +1,235 @@
+{% extends 'boarding/base.html' %}
+{% block title %}{{ candidate.full_name }} – OnBoardHub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center gap-2">
+        <a href="{% url 'hr_dashboard' %}" class="btn btn-sm" style="background:#fff;border:1px solid #e2e8f0;color:#64748b;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>{{ candidate.full_name }}</h1>
+            <p>{{ candidate.position }} &bull; {{ candidate.department }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- Candidate Info -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-person-badge me-2 text-primary"></i>Candidate Info</div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#3b82f6);display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                        <span style="color:#fff;font-weight:700;font-size:1.5rem;">{{ candidate.full_name|first|upper }}</span>
+                    </div>
+                    <h6 class="mt-2 mb-0">{{ candidate.full_name }}</h6>
+                    <span class="status-badge badge-{{ candidate.status }} mt-1">{{ candidate.get_status_display }}</span>
+                </div>
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted" style="font-size:0.8rem;width:40%;">Email</td><td style="font-size:0.85rem;">{{ candidate.email }}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Phone</td><td style="font-size:0.85rem;">{{ candidate.phone|default:"—" }}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Position</td><td style="font-size:0.85rem;">{{ candidate.position }}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Department</td><td style="font-size:0.85rem;">{{ candidate.department }}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Joining</td><td style="font-size:0.85rem;">{{ candidate.joining_date|default:"Not set" }}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Added</td><td style="font-size:0.85rem;">{{ candidate.created_at|date:"d M Y" }}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Username</td><td style="font-size:0.85rem;font-family:monospace;">{{ candidate.user.username }}</td></tr>
+                </table>
+
+                <hr>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Documents uploaded</small>
+                        <small class="fw-bold">{{ documents.count }}/7</small>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" style="width:{% widthratio documents.count 7 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-folder2 me-2 text-primary"></i>Submitted Documents</div>
+            <div class="card-body p-0">
+                {% if documents %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead style="background:#f8fafc;">
+                            <tr>
+                                <th class="ps-3">Document</th>
+                                <th>Uploaded</th>
+                                <th>Status</th>
+                                <th>File</th>
+                                <th class="pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td class="ps-3">
+                                <div style="font-weight:600;font-size:0.875rem;">{{ doc.get_doc_type_display }}</div>
+                                {% if doc.hr_remarks %}
+                                <div style="font-size:0.75rem;color:#64748b;">Remark: {{ doc.hr_remarks }}</div>
+                                {% endif %}
+                            </td>
+                            <td style="font-size:0.8rem;color:#64748b;">{{ doc.uploaded_at|date:"d M Y, H:i" }}</td>
+                            <td>
+                                <span class="status-badge badge-{{ doc.status }}">
+                                    {% if doc.status == 'pending' %}<i class="bi bi-clock me-1"></i>{% endif %}
+                                    {% if doc.status == 'approved' %}<i class="bi bi-check me-1"></i>{% endif %}
+                                    {% if doc.status == 'rejected' %}<i class="bi bi-x me-1"></i>{% endif %}
+                                    {{ doc.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm" style="background:#f1f5f9;border:1px solid #e2e8f0;color:#374151;">
+                                    <i class="bi bi-download me-1"></i>View
+                                </a>
+                            </td>
+                            <td class="pe-3">
+                                {% if doc.status != 'approved' %}
+                                <button class="btn btn-sm btn-success me-1" data-bs-toggle="modal" data-bs-target="#reviewModal{{ doc.pk }}" data-action="approved">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                {% endif %}
+                                {% if doc.status != 'rejected' %}
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#reviewModal{{ doc.pk }}" data-action="rejected">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-folder2-open" style="font-size:2.5rem;color:#cbd5e1;"></i>
+                    <p class="mt-2 text-muted" style="font-size:0.875rem;">No documents uploaded yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Missing documents list -->
+        {% with uploaded_types=documents.values_list|join:"," %}
+        <div class="card mt-3">
+            <div class="card-header"><i class="bi bi-list-check me-2 text-warning"></i>Document Checklist</div>
+            <div class="card-body py-2">
+                <div class="row g-2">
+                    {% for doc_key, doc_label in doc_types %}
+                    {% with found=documents|dictsort:"doc_type" %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-2 py-1">
+                            {% if documents|length > 0 %}
+                                {% with submitted=False %}
+                                {% for doc in documents %}
+                                    {% if doc.doc_type == doc_key %}
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                        <span style="font-size:0.85rem;">{{ doc_label }}</span>
+                                        {% if doc.status == 'rejected' %}
+                                        <span class="badge bg-danger ms-auto" style="font-size:0.7rem;">Rejected</span>
+                                        {% elif doc.status == 'approved' %}
+                                        <span class="badge bg-success ms-auto" style="font-size:0.7rem;">Approved</span>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+
+                <!-- Simpler cleaner checklist approach -->
+                <div class="row g-1">
+                    {% for doc_key, doc_label in doc_types %}
+                    <div class="col-md-6">
+                        {% with doc_found=None %}
+                        {% for doc in documents %}
+                            {% if doc.doc_type == doc_key %}
+                            <div class="d-flex align-items-center gap-2 rounded p-2" style="background:{% if doc.status == 'approved' %}#f0fdf4{% elif doc.status == 'rejected' %}#fff1f2{% else %}#eff6ff{% endif %};">
+                                <i class="bi {% if doc.status == 'approved' %}bi-check-circle-fill text-success{% elif doc.status == 'rejected' %}bi-x-circle-fill text-danger{% else %}bi-clock-fill text-primary{% endif %}"></i>
+                                <span style="font-size:0.82rem;">{{ doc_label }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+    </div>
+</div>
+
+<!-- Review Modals -->
+{% for doc in documents %}
+<div class="modal fade" id="reviewModal{{ doc.pk }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;border:none;">
+            <div class="modal-header" style="border-bottom:1px solid #e2e8f0;">
+                <h6 class="modal-title fw-bold">Review: {{ doc.get_doc_type_display }}</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'review_document' doc.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                            <i class="bi bi-eye me-2"></i>Preview Document
+                        </a>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Action *</label>
+                        <div class="d-flex gap-2">
+                            <label class="flex-fill">
+                                <input type="radio" name="action" value="approved" class="d-none" id="approve{{ doc.pk }}">
+                                <div class="p-2 rounded text-center approve-opt" style="cursor:pointer;border:2px solid #e2e8f0;font-size:0.85rem;">
+                                    <i class="bi bi-check-circle text-success d-block fs-4"></i> Approve
+                                </div>
+                            </label>
+                            <label class="flex-fill">
+                                <input type="radio" name="action" value="rejected" class="d-none" id="reject{{ doc.pk }}">
+                                <div class="p-2 rounded text-center reject-opt" style="cursor:pointer;border:2px solid #e2e8f0;font-size:0.85rem;">
+                                    <i class="bi bi-x-circle text-danger d-block fs-4"></i> Reject
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Remarks (optional)</label>
+                        <textarea name="remarks" class="form-control" rows="2" placeholder="Add notes for the candidate...">{{ doc.hr_remarks }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #e2e8f0;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="background:#f1f5f9;border:1px solid #e2e8f0;">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('[type=radio][name=action]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const label = this.closest('label');
+        const siblings = label.closest('.d-flex').querySelectorAll('label');
+        siblings.forEach(l => l.querySelector('div').style.borderColor = '#e2e8f0');
+        label.querySelector('div').style.borderColor = this.value === 'approved' ? '#22c55e' : '#ef4444';
+    });
+});
+</script>
+{% endblock %}

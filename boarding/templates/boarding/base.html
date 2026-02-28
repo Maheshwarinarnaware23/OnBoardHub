@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OnBoardHub{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a56db; --primary-dark: #1341b0; --sidebar-bg: #0f172a; --sidebar-text: #94a3b8; --sidebar-active: #1a56db; }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #f1f5f9; min-height: 100vh; }
+        .sidebar { width: 240px; min-height: 100vh; background: var(--sidebar-bg); position: fixed; top: 0; left: 0; z-index: 100; display: flex; flex-direction: column; }
+        .sidebar-brand { padding: 1.5rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .sidebar-brand .brand-name { font-size: 1.1rem; font-weight: 700; color: #fff; }
+        .sidebar-brand .brand-sub { font-size: 0.7rem; color: var(--sidebar-text); text-transform: uppercase; letter-spacing: 1px; }
+        .sidebar-nav { padding: 1rem 0; flex: 1; }
+        .sidebar-nav .nav-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: #475569; padding: 0.5rem 1.25rem; margin-top: 0.5rem; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.25rem; color: var(--sidebar-text); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: all 0.15s; margin: 1px 0.5rem; border-radius: 6px; }
+        .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+        .sidebar-nav a.active { background: var(--sidebar-active); color: #fff; }
+        .sidebar-nav a i { font-size: 1rem; width: 20px; text-align: center; }
+        .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.07); }
+        .sidebar-footer .user-name { color: #e2e8f0; font-size: 0.85rem; font-weight: 600; }
+        .sidebar-footer .user-role { color: var(--sidebar-text); font-size: 0.72rem; }
+        .main-content { margin-left: 240px; padding: 2rem; min-height: 100vh; }
+        .page-header { margin-bottom: 1.5rem; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; }
+        .page-header p { color: #64748b; margin: 0.25rem 0 0; font-size: 0.875rem; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .card-header { background: #fff; border-bottom: 1px solid #e2e8f0; border-radius: 12px 12px 0 0 !important; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.9rem; color: #0f172a; }
+        .stat-card { border-radius: 12px; padding: 1.25rem; color: #fff; position: relative; overflow: hidden; }
+        .stat-card .stat-icon { font-size: 2rem; opacity: 0.25; position: absolute; right: 1rem; top: 1rem; }
+        .stat-card .stat-value { font-size: 2rem; font-weight: 700; }
+        .stat-card .stat-label { font-size: 0.8rem; opacity: 0.85; }
+        .bg-primary-grad { background: linear-gradient(135deg, #1a56db, #3b82f6); }
+        .bg-warning-grad { background: linear-gradient(135deg, #d97706, #f59e0b); }
+        .bg-info-grad { background: linear-gradient(135deg, #0891b2, #22d3ee); }
+        .bg-success-grad { background: linear-gradient(135deg, #059669, #34d399); }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-in_progress { background: #dbeafe; color: #1e40af; }
+        .badge-completed { background: #d1fae5; color: #065f46; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        .status-badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600; }
+        .table td { font-size: 0.875rem; vertical-align: middle; color: #334155; }
+        .table tbody tr:hover { background: #f8fafc; }
+        .alert { border: none; border-radius: 8px; font-size: 0.875rem; }
+        .progress { border-radius: 20px; height: 8px; }
+        .progress-bar { border-radius: 20px; }
+        .doc-card { border: 1.5px dashed #cbd5e1; border-radius: 10px; padding: 1rem; background: #f8fafc; transition: border-color 0.2s; }
+        .doc-card:hover { border-color: var(--primary); }
+        .doc-card.uploaded { border-style: solid; border-color: #86efac; background: #f0fdf4; }
+        .doc-card.rejected { border-style: solid; border-color: #fca5a5; background: #fff1f2; }
+        .doc-card .doc-icon { font-size: 1.5rem; }
+        .doc-card .doc-title { font-weight: 600; font-size: 0.875rem; color: #0f172a; }
+        .btn { border-radius: 8px; font-weight: 500; font-size: 0.875rem; }
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+        .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+        .form-control, .form-select { border-radius: 8px; border-color: #cbd5e1; font-size: 0.875rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+        .form-label { font-weight: 600; font-size: 0.8rem; color: #374151; text-transform: uppercase; letter-spacing: 0.3px; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="d-flex align-items-center gap-2">
+                <div style="width:32px;height:32px;background:var(--sidebar-active);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-building-check text-white" style="font-size:1rem;"></i>
+                </div>
+                <div>
+                    <div class="brand-name">OnBoardHub</div>
+                    <div class="brand-sub">HR Portal</div>
+                </div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            {% if user.is_staff or user.is_superuser %}
+            <div class="nav-label">HR Management</div>
+            <a href="{% url 'hr_dashboard' %}" class="{% if request.resolver_match.url_name == 'hr_dashboard' %}active{% endif %}">
+                <i class="bi bi-grid-1x2"></i> Dashboard
+            </a>
+            <a href="{% url 'create_candidate' %}" class="{% if request.resolver_match.url_name == 'create_candidate' %}active{% endif %}">
+                <i class="bi bi-person-plus"></i> Add Candidate
+            </a>
+            {% else %}
+            <div class="nav-label">My Onboarding</div>
+            <a href="{% url 'candidate_dashboard' %}" class="{% if request.resolver_match.url_name == 'candidate_dashboard' %}active{% endif %}">
+                <i class="bi bi-person-vcard"></i> My Documents
+            </a>
+            {% endif %}
+        </nav>
+        <div class="sidebar-footer">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <div style="width:32px;height:32px;background:#1e293b;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-person-fill text-white" style="font-size:0.9rem;"></i>
+                </div>
+                <div>
+                    <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="user-role">{% if user.is_staff %}HR Manager{% else %}Candidate{% endif %}</div>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="btn btn-sm w-100" style="background:rgba(255,255,255,0.07);color:#94a3b8;border:none;">
+                <i class="bi bi-box-arrow-left me-1"></i> Sign Out
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                <i class="bi bi-{% if msg.tags == 'success' %}check-circle{% elif msg.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+
+{% else %}
+    {% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
